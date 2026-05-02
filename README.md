@@ -7,11 +7,19 @@
 ```
 skill-kit/
 ├── README.md
-└── skills/
-    ├── commit-helper/
-    │   └── SKILL.md
-    └── gen-skill/
-        └── SKILL.md
+├── skills/
+│   ├── commit-helper/
+│   │   └── SKILL.md
+│   ├── extract-system-knowledge/
+│   │   ├── SKILL.md
+│   │   └── templates.md
+│   └── gen-skill/
+│       └── SKILL.md
+└── knowledges/                      # 由 extract-system-knowledge 按需生成（可选）
+    ├── INDEX.md
+    └── <name>-knowledge/
+        ├── KNOWLEDGE.md
+        └── sources.json
 ```
 
 ## 现有 Skills
@@ -19,6 +27,7 @@ skill-kit/
 | Skill | 作用 | 典型触发词 |
 | --- | --- | --- |
 | [`commit-helper`](skills/commit-helper/SKILL.md) | 分析已暂存的 Git 改动，生成符合规范（如 `FEAT[YYYYMMDD]: ...`）的中文提交信息 | 提交、commit、git commit、`/skill-commit-helper` |
+| [`extract-system-knowledge`](skills/extract-system-knowledge/SKILL.md) | 从 Confluence 文档树（含子文档）和项目代码提炼"概念 / 关系 / 逻辑"三层系统知识，文档与代码冲突时以代码为准；产出包写入 `knowledges/<name>-knowledge/` | 提取系统知识、梳理系统、建立项目认知、`/extract-system-knowledge` |
 | [`gen-skill`](skills/gen-skill/SKILL.md) | 从最近一次对话中提炼可复用的工作流程，并生成新的 `SKILL.md` | 生成 skill、提取 skill、`/gen-skill` |
 
 ## 使用方式
@@ -63,6 +72,27 @@ cp -R /path/to/skill-kit/skills/commit-helper .cursor/skills/
 - 正文 ≤ 200 行；超出部分用 `reference.md` / `examples.md` 拆分
 - 使用第三人称祈使句，避免“我会 / 你可以”
 - 不写时效性内容、不放一次性的项目细节
+
+## Knowledges
+
+由 [`extract-system-knowledge`](skills/extract-system-knowledge/SKILL.md) 产出的"系统知识包"约定如下：
+
+- 一个知识包对应一个目录 `knowledges/<name>-knowledge/`，`<name>` 用 kebab-case
+- 目录内固定两个文件：
+  - `KNOWLEDGE.md`：YAML frontmatter（`name` / `system` / `generated_at` / `sources[]` / `code_anchors[]` / `status`）+ 7 节正文（系统定位 / 概念表 / 关系 / 流程 / 文档vs代码差异 / 未覆盖 / 出处索引）
+  - `sources.json`：原始资料**索引**（`pageId` / `title` / `url` / `confluence_updated` / `depth` / `parent_pageId`），**不落正文**——重读时按 pageId 用 `get_confluence_content` 重抓
+- 顶层 `knowledges/INDEX.md` 由 skill 自动 upsert，记录该 root 下所有知识包
+
+输出位置在 skill 运行时由用户三选一：
+
+- **项目内** `<repo>/knowledges/`（推荐，团队共享）
+- **个人** `~/.cursor/knowledges/`（跨项目、私人）
+- **skill-kit 仓库** `<skill-kit>/knowledges/`（集中管理、可发布）
+
+让模型用上知识包的两种方式：
+
+- 临时引用：`@knowledges/<name>-knowledge/KNOWLEDGE.md`
+- 自动注入：在 `<repo>/.cursor/rules/` 下加一个 `<name>-knowledge.mdc`（`alwaysApply: true`）指向该 KNOWLEDGE.md
 
 ## 维护
 
