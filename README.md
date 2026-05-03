@@ -79,7 +79,7 @@ cp -R /path/to/skill-kit/skills/commit-helper .cursor/skills/
 
 - 一个知识包对应一个目录 `knowledges/<name>-knowledge/`，`<name>` 用 kebab-case
 - 目录内固定两个文件：
-  - `KNOWLEDGE.md`：YAML frontmatter（`name` / `system` / `generated_at` / `sources[]` / `code_anchors[]` / `status`）+ 7 节正文（系统定位 / 概念表 / 关系 / 流程 / 文档vs代码差异 / 未覆盖 / 出处索引）
+  - `KNOWLEDGE.md`：YAML frontmatter（`name` / `system` / `description` / `generated_at` / `code_anchors[]` / `status`）+ 7 节正文（系统定位 / 概念表 / 关系 / 流程 / 文档vs代码差异 / 未覆盖 / 出处索引）
   - `sources.json`：原始资料**索引**（`pageId` / `title` / `url` / `confluence_updated` / `depth` / `parent_pageId`），**不落正文**——重读时按 pageId 用 `get_confluence_content` 重抓
 - 顶层 `knowledges/INDEX.md` 由 skill 自动 upsert，记录该 root 下所有知识包
 

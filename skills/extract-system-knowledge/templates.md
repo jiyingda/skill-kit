@@ -60,14 +60,9 @@ graph LR
 ---
 name: focus-workbench
 system: Focus 工作台
+description: Focus 工作台是面向辅导老师的带班工作台，覆盖学生档案、沟通记录、任务系统、学习数据查看与续报等场景
 generated_at: 2026-05-02
 generator: extract-system-knowledge@v1
-sources:
-  - pageId: "827675663"
-    title: Focus 工作台
-    url: https://confluence.zhenguanyu.com/pages/viewpage.action?pageId=827675663
-    confluence_updated: 2025-03-13
-    depth: 0
 code_anchors:
   - path: backend/api/focus
     note: focus 列表页接口
@@ -79,11 +74,13 @@ status: draft   # draft | reviewed | stale
 
 - `name`：kebab-case，与目录名前缀一致
 - `system`：人类可读的系统名
+- `description`：一句话说明这个系统是什么（≤ 80 字），让模型/用户不打开正文也能判断是否相关
 - `generated_at`：本次生成日期（YYYY-MM-DD）
 - `generator`：固定 `extract-system-knowledge@v1`，方便未来工具识别
-- `sources[]`：抓过的每页 pageId / title / url / confluence_updated / depth；与 sources.json 同步
 - `code_anchors[]`：相关代码路径与说明（无项目代码时为空数组 `[]`）
 - `status`：`draft`（首次生成）/ `reviewed`（人工核对过）/ `stale`（已知过期，待刷新）
+
+> 抓过的页面清单只放在同目录下的 `sources.json`（见第 5 节），不再在 frontmatter 里重复，避免双份维护。
 
 ### 4.2 正文 7 节
 
@@ -127,7 +124,7 @@ status: draft   # draft | reviewed | stale
   "schema_version": 1,
   "system": "Focus 工作台",
   "captured_at": "2026-05-02T17:21:00+08:00",
-  "captured_via": ["get_confluence_content", "rest:/child/page"],
+  "captured_via": ["get_confluence_content", "get_confluence_content_by_title", "rest:/child/page"],
   "pages": [
     {
       "pageId": "827675663",
@@ -135,7 +132,8 @@ status: draft   # draft | reviewed | stale
       "url": "https://confluence.zhenguanyu.com/pages/viewpage.action?pageId=827675663",
       "confluence_updated": "2025-03-13T15:14:48+08:00",
       "depth": 0,
-      "parent_pageId": null
+      "parent_pageId": null,
+      "note": "入口页，正文为空（目录型父页）"
     }
   ]
 }
@@ -145,9 +143,15 @@ status: draft   # draft | reviewed | stale
 
 - `schema_version`：固定 `1`
 - `system` / `captured_at`：与 KNOWLEDGE.md frontmatter 保持一致
-- `captured_via[]`：实际用到的抓取工具，方便排查
+- `captured_via[]`：实际用到的抓取工具/端点，方便排查（如 `get_confluence_content` / `get_confluence_content_by_title` / `rest:/child/page`）
 - `pages[].depth`：相对入口页的递归深度，入口页 `0`，直接子页 `1`
 - `pages[].parent_pageId`：入口页为 `null`，其余指向父 pageId
+- `pages[].note`（可选）：自由文本，标注特殊情况，常见值：
+  - `"入口页，正文为空（目录型父页）"` —— 该页只用作子页索引，不参与概念/流程提取
+  - `"由 get_confluence_content_by_title 抓取"` —— URL 是 `/display/<SpaceKey>/<Title>` 形式
+  - `"权限受限，部分内容缺失"` —— 抓到了但内容不完整
+
+**多入口模式**：用户给一组兄弟 URL（不是单根递归）时，每个入口页都是 `depth: 0`、`parent_pageId: null`；递归出来的子页 `depth >= 1`、`parent_pageId` 指向其入口或上一层。
 
 ## 6. INDEX.md 模板
 
